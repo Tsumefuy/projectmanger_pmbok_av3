@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciclo de Vida do Projeto - PMBOK</title>
+    <title>Interação de Processos - PMBOK</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
     <style>
@@ -11,243 +12,191 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f4f4f9;
+            background-color: #f8f9fa;
             color: #333;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
+
         h1 {
-            color: #2c3e50;
+            color: #174294;
             margin-bottom: 5px;
             text-align: center;
             font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
+
         h2 {
-            color: #2c3e50;
-            margin-bottom: 10px;
+            color: #eb5f2d;
+            margin-bottom: 25px;
             text-align: center;
-            font-size: 1rem;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-       .img-container {
-          display: flex;            
-          justify-content: center;  
-          align-items: center;      
-          width: 100%;              
-          margin-top: 20px;
-        }
-        
-        
-        .img-container img {
-          max-width: 200px;  
-          width: 100%;      
-          height: auto;      
-        }
+
         .chart-container {
             position: relative;
-            height: 60vh;
+            height: 70vh; 
             width: 95vw;
-            max-width: 1000px;
+            max-width: 1200px;
             background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            letter-spacing: 1.5px;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0,0,0,0.05);
         }
-        .legend {
-            margin-top: 20px;
-            font-size: 0.9rem;
-            color: #555;
-            text-align: center;
-            max-width: 800px;
+
+        .img-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin-top: 30px;
         }
-        /* Responsividade para mobile */
+
+        .img-container img {
+            max-width: 200px;
+            width: 100%;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+        
+        .img-container img:hover {
+            transform: scale(1.05);
+        }
+
         @media (max-width: 600px) {
-          .img-container img {
-              max-width: 100px;  
-            }
-            .chart-container {
-                height: 50vh;
-                padding: 10px;
-            }
+            .chart-container { height: 60vh; padding: 15px; }
             h1 { font-size: 1.2rem; }
         }
     </style>
 </head>
+
 <body>
 
-    <h1>Ciclo de Vida do Projeto (PMBOK)</h1>
-    <h2>AMPLIAÇÃO DO PARQUE INDUSTRIAL: GESTÃO DA INTEGRAÇÃO</h2>
+    <h1>Ciclo de Vida: Interação entre Grupos de Processos</h1>
+    <h2>Ampliação do Parque Industrial da Gordelícias Inc.</h2>
+    
     <div class="chart-container">
         <canvas id="lifecycleChart"></canvas>
     </div>
 
     <script>
-        // Configuração dos dados baseados no cronograma do usuário
-        // Datas: Ago/25 a Dez/27
-        
+        // --- ESCALA DE TEMPO (27 Meses) ---
         const labels = [
-            // 2025
-            'Ago/25', 'Set/25', 'Out/25', 'Nov/25', 'Dez/25',
-            // 2026
-            'Jan/26', 'Fev/26', 'Mar/26', 'Abr/26', 'Mai/26', 'Jun/26', 
-            'Jul/26', 'Ago/26', 'Set/26', 'Out/26', 'Nov/26', 'Dez/26',
-            // 2027
-            'Jan/27', 'Fev/27', 'Mar/27', 'Abr/27', 'Mai/27', 'Jun/27', 
-            'Jul/27', 'Ago/27', 'Set/27', 'Out/27', 'Nov/27', 'Dez/27'
+            'Out/25', 'Nov/25', 'Dez/25',
+            'Jan/26', 'Fev/26', 'Mar/26', 'Abr/26', 'Mai/26', 'Jun/26', 'Jul/26', 'Ago/26', 'Set/26', 'Out/26', 'Nov/26', 'Dez/26',
+            'Jan/27', 'Fev/27', 'Mar/27', 'Abr/27', 'Mai/27', 'Jun/27', 'Jul/27', 'Ago/27', 'Set/27', 'Out/27', 'Nov/27', 'Dez/27'
         ];
 
-        // Simulando a curva de Custo/Pessoal (S-Curve / Bell Curve)
-        // Planejamento (5 meses): Baixo crescimento
-        // Obras (12 meses): Crescimento acentuado até o pico
-        // Instalações (8 meses): Platô alto
-        // Testes (5 meses): Começa a descer
-        // Entrega (1 mês): Queda final
-        const dataPoints = [
-            // Planejamento (Ago/25 - Dez/25)
-            5, 8, 12, 15, 18, 
-            // Obras (Jan/26 - Jan/27) - Aumento agressivo de recursos
-            25, 35, 45, 55, 65, 75, 80, 85, 88, 90, 92, 94,
-            // Instalações (Jan/27 - Ago/27) - Manutenção do pico e leve variação
-            95, 95, 94, 93, 92, 90, 85, 80,
-            // Testes (Ago/27 - Dez/27) - Declínio conforme validações ocorrem
-            70, 60, 45, 30, 
-            // Entrega (Dez/27)
-            5 
-        ];
+        // --- DADOS SUAVIZADOS (CURVAS PERFEITAS) ---
+        const dataIniciacao = [20, 55, 35, 10, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        const dataPlanejamento = [5, 25, 65, 85, 60, 35, 20, 12, 8, 5, 3, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        const dataExecucao = [0, 2, 8, 20, 35, 52, 68, 82, 92, 98, 100, 98, 94, 88, 78, 68, 58, 48, 38, 28, 18, 10, 5, 2, 0, 0, 0];
+        const dataControle = [3, 6, 10, 14, 18, 21, 23, 24, 25, 25, 25, 25, 25, 25, 25, 25, 24, 23, 21, 19, 16, 13, 10, 7, 4, 2, 0];
+        const dataEncerramento = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 8, 20, 40, 65, 75, 45, 0];
 
-        // Contexto das fases para anotações e cores
         const ctx = document.getElementById('lifecycleChart').getContext('2d');
+        
+        function createGradient(colorStart, colorEnd) {
+            const gradient = ctx.createLinearGradient(0, 0, 1000, 0);
+            gradient.addColorStop(0, colorStart);
+            gradient.addColorStop(1, colorEnd);
+            return gradient;
+        }
+
+        const gradInic = createGradient('#4DB6AC',('#80CBC4'));
+        const gradPlan = createGradient('#1E88E5', '#64B5F6');
+        const gradExec = createGradient('#3949AB', '#7986CB');
+        const gradCont = createGradient('#E53935', '#EF9A9A');
+        const gradEnc = createGradient('#43A047', '#A5D6A7');
 
         const chart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
-                datasets: [{
-                    label: 'Nível de Custos e Pessoal',
-                    data: dataPoints,
-                    borderColor: '#333',
-                    borderWidth: 3,
-                    borderDash: [5, 5], // Linha tracejada como na imagem original
-                    tension: 0.4, // Suavização da curva
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#333',
-                    pointRadius: 4,
-                    fill: true,
-                    backgroundColor: (context) => {
-                        const ctx = context.chart.ctx;
-                        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.1)');
-                        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
-                        return gradient;
-                    }
-                }]
+                datasets: [
+                    { label: 'Iniciação', data: dataIniciacao, borderColor: gradInic, backgroundColor: 'transparent', borderWidth: 4, tension: 0.6, pointRadius: 0, pointHitRadius: 10 },
+                    { label: 'Planejamento', data: dataPlanejamento, borderColor: gradPlan, backgroundColor: 'transparent', borderWidth: 4, tension: 0.6, pointRadius: 0, pointHitRadius: 10 },
+                    { label: 'Execução', data: dataExecucao, borderColor: gradExec, backgroundColor: 'transparent', borderWidth: 5, tension: 0.6, pointRadius: 0, pointHitRadius: 10 },
+                    { label: 'Controle', data: dataControle, borderColor: gradCont, backgroundColor: 'transparent', borderWidth: 4, tension: 0.6, pointRadius: 0, pointHitRadius: 10 },
+                    { label: 'Encerramento', data: dataEncerramento, borderColor: gradEnc, backgroundColor: 'transparent', borderWidth: 4, tension: 0.6, pointRadius: 0, pointHitRadius: 10 }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 layout: {
-                    padding: {
-                        top: 30,  // Adicionado padding superior para evitar cortes nos textos
-                        right: 20,
-                        left: 10
+                    // AQUI ESTÁ A CORREÇÃO: PADDING LEFT AUMENTADO PARA 70
+                    padding: { 
+                        top: 60,    
+                        right: 50,  
+                        left: 70, // Espaço suficiente para a legenda vertical não cortar
+                        bottom: 20 
                     }
                 },
                 interaction: {
-                    mode: 'index',
-                    intersect: false,
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
                 },
                 plugins: {
-                    legend: {
-                        display: false
-                    },
+                    legend: { display: false },
                     tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#333',
+                        bodyColor: '#333',
+                        borderColor: 'rgba(0,0,0,0.1)',
+                        borderWidth: 1,
+                        padding: 15,       // Aumentei para dar mais ar em volta
+                        boxPadding: 10,    // Aumentei o gap entre a cor e o texto
+                        usePointStyle: true, // (Opcional) Deixa o ícone da cor redondo em vez de quadrado
+                        displayColors: true,
                         callbacks: {
-                            label: function(context) {
-                                return `Nível de Esforço: ${context.parsed.y}%`;
-                            },
-                            afterLabel: function(context) {
-                                const index = context.dataIndex;
-                                // Lógica para mostrar a tarefa atual no tooltip
-                                if (index <= 4) return "Fase: Planejamento/Licenças";
-                                if (index <= 16) return "Fase: Obras";
-                                if (index <= 24) return "Fase: Instalações + Linhas";
-                                if (index <= 27) return "Fase: Testes";
-                                return "Fase: Entrega";
+                            label: function(context) { 
+                                // Removi o ' ' manual pois o boxPadding já resolve
+                                return context.dataset.label + ': ' + context.parsed.y + '%'; 
                             }
                         }
                     },
                     annotation: {
+                        clip: false, 
                         annotations: {
-                            // Linhas verticais separando as fases do PMBOK
-                            line1: {
+                            // Rótulos das curvas
+                            labelInic: { type: 'label', xValue: 1, yValue: 60, content: 'Iniciação', color: '#00897B', font: { weight: 'bold', size: 13 } },
+                            labelPlan: { type: 'label', xValue: 3.5, yValue: 90, content: 'Planejamento', color: '#1565C0', font: { weight: 'bold', size: 13 } },
+                            labelExec: { type: 'label', xValue: 10.5, yValue: 105, content: 'Execução', color: '#283593', font: { weight: 'bold', size: 15 } },
+                            labelCont: { type: 'label', xValue: 16, yValue: 30, content: 'Controle', color: '#C62828', font: { weight: 'bold', size: 13 } },
+                            labelEnc: { type: 'label', xValue: 24.5, yValue: 80, content: 'Encerramento', color: '#2E7D32', font: { weight: 'bold', size: 13 } },
+                            
+                            // SETA VERTICAL (EIXO Y)
+                            arrowY: {
                                 type: 'line',
-                                xMin: 6.5, // Entre Dez/25 e Jan/26
-                                xMax: 6.5,
-                                borderColor: 'rgba(0,0,0,0.3)',
-                                borderWidth: 0,
-                                label: {
-                                    display: true,
-                                    content: 'Fim Planejamento',
-                                    position: 'start',
-                                    backgroundColor: 'rgba(0,0,0,0.7)',
-                                    color: 'white',
-                                    font: { size: 10 }
-                                }
+                                xMin: 0, xMax: 0, yMin: 0, yMax: 115, 
+                                borderColor: '#B0BEC5', borderWidth: 2,
+                                arrowHeads: { end: { display: true, fill: true, color: '#B0BEC5', length: 12, width: 8 } }
                             },
-                            line2: {
+                            // LEGENDA VERTICAL CORRIGIDA
+                            labelY: {
+                                type: 'label',
+                                xValue: 0, // Ponto zero do eixo X
+                                yValue: 60, // Centro vertical aproximado
+                                content: 'Nível de Interação / Custo',
+                                rotation: -90,
+                                color: '#eb5f2d ', font: { weight: 'bold', size: 16 },
+                                xAdjust: -30 // Empurra o texto para dentro do novo padding-left
+                            },
+
+                            // SETA HORIZONTAL (EIXO X)
+                            arrowX: {
                                 type: 'line',
-                                xMin: 26, // Antes de Dez/27 (Entrega)
-                                xMax: 26,
-                                borderColor: 'rgba(0,0,0,0.3)',
-                                borderWidth: 0,
-                                label: {
-                                    display: true,
-                                    content: 'Encerramento',
-                                    position: 'start',
-                                    backgroundColor: 'rgba(0,0,0,0.7)',
-                                    color: 'white',
-                                    font: { size: 10 }
-                                }
-                            },
-                            // Caixas de fundo para representar as fases macro do PMBOK (Imagem 1)
-                            box1: {
-                                type: 'box',
-                                xMin: -0.5,
-                                xMax: 4.5,
-                                backgroundColor: 'rgba(200, 200, 200, 0.2)',
-                                label: {
-                                    display: true,
-                                    content: ['Organização', 'e Preparação'], // Quebra de linha para caber melhor
-                                    position: { x: 'center', y: '12%' }, // Ajustado para baixo
-                                    color: '#555',
-                                    font: { weight: 'bold' }
-                                }
-                            },
-                            box2: {
-                                type: 'box',
-                                xMin: 4.5,
-                                xMax: 27.5,
-                                backgroundColor: 'rgba(240, 240, 240, 0.1)', // Mais claro para execução
-                                label: {
-                                    display: true,
-                                    content: 'Execução do Trabalho',
-                                    position: { x: 'center', y: '12%' }, // Alinhado com os outros
-                                    color: '#555',
-                                    font: { weight: 'bold' }
-                                }
-                            },
-                            box3: {
-                                type: 'box',
-                                xMin: 27.5,
-                                xMax: 28.5,
-                                backgroundColor: 'rgba(200, 200, 200, 0.2)',
-                                label: {
-                                    display: true,
-                                    position: { x: 'center', y: '12%' }, // Ajustado para baixo
-                                    color: '#555',
-                                    font: { weight: 'bold' }
-                                }
+                                xMin: 0, xMax: 26.8, 
+                                yMin: 0, yMax: 0,
+                                borderColor: '#B0BEC5', borderWidth: 2,
+                                arrowHeads: { end: { display: true, fill: true, color: '#B0BEC5', length: 12, width: 8 } }
                             }
                         }
                     }
@@ -255,33 +204,24 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 100,
-                        title: {
-                            display: true,
-                            text: 'Nível de Custos e Pessoal',
-                            font: { weight: 'bold' }
-      
-                        },
-                        ticks: {
-                            display: false // Oculta números para ficar conceitual como a imagem 1
-                        }
+                        max: 125, 
+                        display: false
                     },
                     x: {
-                        title: {
-                            display: true,
-                            text: 'Tempo (Meses)',
-                            font: { weight: 'bold' }
-                        },
-                        grid: {
-                            display: false
-                        }
+                        display: true,
+                        title: { display: true, text: 'Cronograma do Projeto (Meses)', font: { weight: 'bold', size: 16 }, color: '#eb5f2d', padding: {top: 10} },
+                        grid: { display: false },
+                        border: { display: false }, 
+                        ticks: { color: '#607D8B', font: {size: 12}, padding: 5 }
                     }
                 }
             }
         });
     </script>
+    
     <div class="img-container">
-      <img src="https://www.universidadesenaicimatec.edu.br/wp-content/uploads/2021/07/universidade-senai-cimatec-300x132.png"/>
+        <img src="https://www.universidadesenaicimatec.edu.br/wp-content/uploads/2021/07/universidade-senai-cimatec-300x132.png" alt="Logo SENAI" />
     </div>
 </body>
+
 </html>
